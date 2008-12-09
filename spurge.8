@@ -1,0 +1,232 @@
+.\" This -*- nroff -*- file has been generated from
+.\" DocBook SGML with docbook-to-man on Debian GNU/Linux.
+...\"
+...\"	transcript compatibility for postscript use.
+...\"
+...\"	synopsis:  .P! <file.ps>
+...\"
+.de P!
+\\&.
+.fl			\" force out current output buffer
+\\!%PB
+\\!/showpage{}def
+...\" the following is from Ken Flowers -- it prevents dictionary overflows
+\\!/tempdict 200 dict def tempdict begin
+.fl			\" prolog
+.sy cat \\$1\" bring in postscript file
+...\" the following line matches the tempdict above
+\\!end % tempdict %
+\\!PE
+\\!.
+.sp \\$2u	\" move below the image
+..
+.de pF
+.ie     \\*(f1 .ds f1 \\n(.f
+.el .ie \\*(f2 .ds f2 \\n(.f
+.el .ie \\*(f3 .ds f3 \\n(.f
+.el .ie \\*(f4 .ds f4 \\n(.f
+.el .tm ? font overflow
+.ft \\$1
+..
+.de fP
+.ie     !\\*(f4 \{\
+.	ft \\*(f4
+.	ds f4\"
+'	br \}
+.el .ie !\\*(f3 \{\
+.	ft \\*(f3
+.	ds f3\"
+'	br \}
+.el .ie !\\*(f2 \{\
+.	ft \\*(f2
+.	ds f2\"
+'	br \}
+.el .ie !\\*(f1 \{\
+.	ft \\*(f1
+.	ds f1\"
+'	br \}
+.el .tm ? font underflow
+..
+.ds f1\"
+.ds f2\"
+.ds f3\"
+.ds f4\"
+'\" t 
+.ta 8n 16n 24n 32n 40n 48n 56n 64n 72n  
+.TH "SPURGE" "8" 
+.SH "NAME" 
+spurge \(em serve bulletin board data using RGTP 
+.SH "SYNOPSIS" 
+.PP 
+\fBspurge\fP [\fB--help\fP]  [\fB--vault\fP \fIvault name\fP]  [\fB--user\fP \fIuser name\fP]  [\fB--list\fP]  [\fB--create\fP]  [\fB--destroy\fP]  [\fB--set\fP \fIflag\fP]  [\fB--no-logging\fP]  
+.SH "DESCRIPTION" 
+.PP 
+spurge is a server for the Reverse Gossip Transfer Protocol 
+(RGTP), 
+a linear bulletin board transfer protocol first popularised on the Cambridge 
+GROGGS system. 
+.PP 
+This manual page is still a work in progress. Much is not yet 
+documented that should be. 
+.SH "A BRIEF OVERVIEW OF REVERSE GOSSIP" 
+.PP 
+An RGTP-based bulletin board consists of a series of items, 
+identified by an itemid (a code of the form A1234567) and a subject line. 
+Each item acts as a separate discussion forum. Users may append comments 
+to the end of any item below a certain size; once an item reaches maximum 
+length, a new item must be created. This helps reduce the subject drift between 
+the stated subject of an item and its actual topic which is so common on Usenet. 
+The server tracks which items are continuations of which, thus 
+forming threads. 
+.SH "OPTIONS" 
+.PP 
+Most of the command-line options do nothing useful yet. 
+However, these do have a useful function: 
+.IP "\fB--help\fP         " 10 
+Prints a brief (too brief) message and quits. 
+.IP "\fB--vault\fP \fIvault name\fP         " 10 
+Selects a vault other than the default. If you don't give this option, 
+the vault "default" is used. 
+.IP "\fB--no-logging\fP         " 10 
+Turns off logging, just for this run. This is especially useful when 
+you want to run spurge from the command line; if a vault is set 
+up to write logs, it will fail with a permissions error when you 
+run it as an ordinary user unless you turn the logging off. 
+ 
+.SH "WHAT'S WITH THESE 484 ERRORS?" 
+.PP 
+484 is the RGTP general failure error, rather like 500 in HTTP. 
+If spurge runs into an error that it can't possibly handle, it will 
+display it as a 484 error, so that the error message will be propagated 
+to the client. The upshot of all this is that fatal error messages are 
+printed with the number 484 at the start. 
+.PP 
+If you're debugging, it may be useful to see a stack trace of 
+where the crash occurred printed after the 484 message. See 
+the "tracebacks" option in CONFIGURATION, below, to find out how 
+to get this. 
+.PP 
+If you see a 484 error and you think 
+it shouldn't have happened, please do mail spurge@thurman.org.uk with 
+information about what was happening. If the error's repeatable, 
+including a traceback would be useful too. 
+.SH "CONFIGURATION" 
+.PP 
+If a vault contains a file named "config", spurge will load settings 
+from that file. It will read global settings from the file "/etc/spurge.conf" as well, 
+but settings in "config" overrule those in "/etc/spurge.conf". 
+.PP 
+Here are the values that can be set in the "[main]" paragraph: 
+.IP "\fBallow-anonymous\fP         " 10 
+If 1, users can browse the server without logging in, 
+although they cannot post. If 0, they must log in before 
+being granted any material access. 
+.IP "\fBdefault-language\fP" 10 
+The language for the textual part of RGTP messages. Only "en" (English) is currently defined. 
+ 
+.IP "\fBdown\fP         " 10 
+If this is defined, the server will not start when 
+invoked; instead, it will produce the given text as an 
+error message and then exit. This is useful during maintenance 
+work.  
+.IP "\fBeligible\fP         " 10 
+Users whose name matches this pattern get an account as soon as they apply. 
+All others have to have their application checked by the Editors. 
+\fINot honoured in this version. Currently, all users are considered eligible.\fP            
+.IP "\fBedit-lock-timeout\fP" 10 
+The amount of time in seconds that an editor may hold an exclusive lock on a file. 
+\fINot honoured in this version, since editor commands are not implemented.\fP            
+.IP "\fBgroggs-motd-bug\fP" 10 
+GROGGS, the original RGTP server, has a bug which swaps the date stamp and sequence number 
+of its message of the day. Use 1 here to emulate this, or 0 to behave according to the protocol. 
+\fINot honoured in this version, since this only affects setting the MOTD, which is an editor 
+command; editor commands are not implemented yet.\fP            
+.IP "\fBlogging\fP" 10 
+Set to 1 to log RGTP activity, 0 not to. See also \fBlog-dir\fP. 
+ 
+.IP "\fBlog-dir\fP         " 10 
+Name of the directory which holds logs for each vault. 
+A log's name is constructed from the name of the vault plus ".log". 
+.IP "\fBmail-from\fP" 10 
+When the server sends out email, this is what goes in the "From" field. 
+If you don't supply a value here, spurge will use "root@" plus the local hostname. 
+See also \fBnewbie-email-body\fP. 
+ 
+.IP "\fBmax-item-size\fP         " 10 
+Maximum size in bytes that an item can reach before it 
+is considered "full", and must be continued. Note that items whose size is less than this limit may 
+be extended beyond it in their last reply. 
+.IP "\fBnewbie-privs\fP" 10 
+Privs to give to newly created users. This should almost always be 2, append access. 
+ 
+.IP "\fBnewbie-email-subject\fP" 10 
+Subject line for the email about new accounts. See also \fBnewbie-email-body\fP. 
+ 
+.IP "\fBnewbie-email-body\fP" 10 
+Body of the email about new accounts. The string "[SECRET]" is replaced with the new 
+secret (this is case sensitive). See also \fBnewbie-email-subject\fP, 
+\fBmail-from\fP and \fBsmtp-server\fP. 
+ 
+.IP "\fBnot-down\fP         " 10 
+Ignored. Useful for saving "down" entries (q.v.) until 
+necessary. 
+.IP "\fBsmtp-server\fP" 10 
+Name of the SMTP server to use for sending out email. See also \fBnewbie-email-body\fP. 
+ 
+.IP "\fBtracebacks\fP" 10 
+If spurge crashes, it will do so gracefully, and represent the error as an RGTP message, 
+so that clients can display it to their users. 
+When trying to track down the problem, it's sometimes useful to see a stack trace. Set this to 1 to 
+have one added to fatal error messages; set it to 0 not to. 
+ 
+.IP "\fBvault-dir\fP         " 10 
+Name of the directory which holds vault subdirectories 
+(see "The Vault", below). 
+.PP 
+In addition, a configuration file may define boilerplate 
+text to be produced by the server, in "[codes]" and "[lang"... sections. 
+This is not usually modified 
+by the administrator, and this manual page does not (yet) attempt 
+to cover it. 
+.SH "THE VAULT" 
+.PP 
+Each invocation of spurge works within one particular directory, 
+called a vault. On installation, there is only one vault, called "default", 
+but you may create others. (Future versions of spurge will have the 
+capacity to do this automatically.) 
+.PP 
+Vaults usually live underneath the directory /usr/lib/spurge. The minimal 
+vault is simply an empty directory; it may also contain one or more of the following 
+files: 
+.IP "\fBA1240111\fP         " 10 
+(and similar names.) Item text. The name is known as an "itemid"; it consists of 
+one letter indicating the year (A being 1986, R being 2002) and seven numbers. 
+(The year after Z year is A year again.) 
+.IP "\fBconfig\fP         " 10 
+Local configuration settings; see CONFIGURATION, above. 
+.IP "\fBeditlog\fP         " 10 
+The edit log. If this is missing, it is the same as if it were empty. 
+\fI(Not viewable in this version.)\fP 	   
+.IP "\fBindex\fP         " 10 
+The index. If this is missing, it is the same as if it were empty. 
+.IP "\fBmotd\fP         " 10 
+The message of the day. 
+.PP 
+As a rule of thumb, files which are not items should not have names which are 
+eight characters long, even if those names are not valid itemids. 
+.SH "SEE ALSO" 
+.PP 
+yarrow (8), wrengroggs (1); the "greed" entry in Info. 
+.PP 
+The RGTP protocol, available at 
+http://www.groggs.group.cam.ac.uk/groggs/protocol.txt 
+.SH "AUTHOR" 
+.PP 
+This manual page was written by Thomas Thurman thomas@thurman.org.uk. 
+Permission is 
+granted to copy, distribute and/or modify this document under 
+the terms of the GNU Free Documentation 
+License, Version 1.1 or any later version published by the Free 
+Software Foundation; with no Invariant Sections, no Front-Cover 
+Texts and no Back-Cover Texts. 
+...\" created by instant / docbook-to-man, Thu 14 Nov 2002, 07:47 

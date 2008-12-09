@@ -1,0 +1,15 @@
+00000000 00000000
+Welcome to this unconfigured RGTP server.
+
+This file should contain the email address of the server's administrators.
+(Until then, if you'd like to know more about this server, you could try
+emailing "root@" + the name of this machine and asking about it.) It can
+also contain news of recent updates, downtime, and so on.
+
+Spurge doesn't yet support editing of this file via RGTP; it should be in
+the next version. Until then, to change this message, you will need to edit
+the "motd" file manually; please leave the top line as it is, since this is
+required by the protocol.
+
+This server is running the Spurge RGTP daemon. For more information, please
+visit <http://rgtp.thurman.org.uk/spurge/>.

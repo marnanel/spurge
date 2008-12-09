@@ -1,0 +1,445 @@
+<!doctype refentry PUBLIC "-//OASIS//DTD DocBook V4.1//EN" [
+
+<!-- Process this file with docbook-to-man to generate an nroff manual
+     page: `docbook-to-man manpage.sgml > manpage.1'.  You may view
+     the manual page with: `docbook-to-man manpage.sgml | nroff -man |
+     less'.  A typical entry in a Makefile or Makefile.am is:
+
+manpage.1: manpage.sgml
+	docbook-to-man $< > $@
+
+    
+	The docbook-to-man binary is found in the docbook-to-man package.
+	Please remember that if you create the nroff version in one of the
+	debian/rules file targets (such as build), you will need to include
+	docbook-to-man in your Build-Depends control field.
+
+  -->
+
+  <!ENTITY dhfirstname "<firstname>Thomas</firstname>">
+  <!ENTITY dhsurname   "<surname>Thurman</surname>">
+  <!-- Please adjust the date whenever revising the manpage. -->
+  <!ENTITY dhdate      "<date>Nov 8, 2002</date>">
+  <!-- SECTION should be 1-8, maybe w/ subsection other parameters are
+       allowed: see man(7), man(1). -->
+  <!ENTITY dhsection   "<manvolnum>8</manvolnum>">
+  <!ENTITY dhemail     "<email>thomas@thurman.org.uk</email>">
+  <!ENTITY dhusername  "Thomas Thurman">
+  <!ENTITY dhucpackage "<refentrytitle>SPURGE</refentrytitle>">
+  <!ENTITY dhpackage   "spurge">
+]>
+
+<refentry>
+  <refentryinfo>
+    <address>
+      &dhemail;
+    </address>
+    <author>
+      &dhfirstname;
+      &dhsurname;
+    </author>
+    <copyright>
+      <year>2002</year>
+      <holder>Thomas Thurman</holder>
+    </copyright>
+    &dhdate;
+  </refentryinfo>
+  <refmeta>
+    &dhucpackage;
+
+    &dhsection;
+  </refmeta>
+  <refnamediv>
+    <refname>&dhpackage;</refname>
+
+    <refpurpose>serve bulletin board data using RGTP</refpurpose>
+  </refnamediv>
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>&dhpackage;</command>
+
+      <arg><option>--help</option></arg>
+      <arg><option>--vault</option> <replaceable>vault name</replaceable></arg>
+      <arg><option>--user</option> <replaceable>user name</replaceable></arg>
+      <arg><option>--list</option></arg>
+      <arg><option>--create</option></arg>
+      <arg><option>--destroy</option></arg>
+      <arg><option>--set</option> <replaceable>flag</replaceable></arg>
+      <arg><option>--no-logging</option></arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+  <refsect1>
+    <title>DESCRIPTION</title>
+
+    <para>&dhpackage; is a server for the Reverse Gossip Transfer Protocol
+    (<acronym>RGTP</acronym>),
+    a linear bulletin board transfer protocol first popularised on the Cambridge
+    <acronym>GROGGS</acronym> system.</para>
+
+    <para>This manual page is still a work in progress. Much is not yet
+    documented that should be.</para>
+
+  </refsect1>
+
+  <refsect1>
+    <title>A BRIEF OVERVIEW OF REVERSE GOSSIP</title>
+
+    <para>An RGTP-based bulletin board consists of a series of items,
+    identified by an itemid (a code of the form A1234567) and a subject line.
+    Each item acts as a separate discussion forum. Users may append comments
+    to the end of any item below a certain size; once an item reaches maximum
+    length, a new item must be created. This helps reduce the subject drift between
+    the stated subject of an item and its actual topic which is so common on Usenet.
+    The server tracks which items are continuations of which, thus
+    forming threads.</para>
+  </refsect1>
+
+  <refsect1>
+    <title>OPTIONS</title>
+    <para>Most of the command-line options do nothing useful yet.
+    However, these do have a useful function:</para>
+
+    <variablelist>
+
+      <varlistentry>
+        <term><option>--help</option>
+        </term>
+        <listitem>
+          <para>Prints a brief (too brief) message and quits.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>--vault</option> <replaceable>vault name</replaceable>
+        </term>
+        <listitem>
+          <para>Selects a vault other than the default. If you don't give this option,
+          the vault "default" is used.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>--no-logging</option>
+        </term>
+        <listitem>
+          <para>
+	  Turns off logging, just for this run. This is especially useful when
+	  you want to run &dhpackage; from the command line; if a vault is set
+	  up to write logs, it will fail with a permissions error when you
+	  run it as an ordinary user unless you turn the logging off.
+	  </para>
+        </listitem>
+      </varlistentry>
+
+     </variablelist>
+
+  </refsect1>
+
+  <refsect1>
+    <title>WHAT'S WITH THESE 484 ERRORS?</title>
+
+    <para>484 is the RGTP general failure error, rather like 500 in HTTP.
+    If &dhpackage; runs into an error that it can't possibly handle, it will
+    display it as a 484 error, so that the error message will be propagated
+    to the client. The upshot of all this is that fatal error messages are
+    printed with the number 484 at the start.</para>
+
+    <para>If you're debugging, it may be useful to see a stack trace of
+    where the crash occurred printed after the 484 message. See
+    the "tracebacks" option in CONFIGURATION, below, to find out how
+    to get this.</para>
+
+    <para>If you see a 484 error and you think
+    it shouldn't have happened, please do mail spurge@thurman.org.uk with
+    information about what was happening. If the error's repeatable,
+    including a traceback would be useful too.</para>
+  </refsect1>
+
+  <refsect1>
+    <title>CONFIGURATION</title>
+
+    <para>If a vault contains a file named "config", spurge will load settings
+    from that file. It will read global settings from the file "/etc/spurge.conf" as well,
+    but settings in "config" overrule those in "/etc/spurge.conf".</para>
+
+    <para>Here are the values that can be set in the "[main]" paragraph:</para>
+
+    <variablelist>
+
+      <varlistentry>
+        <term><option>allow-anonymous</option>
+        </term>
+        <listitem>
+          <para>If 1, users can browse the server without logging in,
+          although they cannot post. If 0, they must log in before
+          being granted any material access.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>default-language</option></term>
+        <listitem>
+          <para>The language for the textual part of RGTP messages. Only "en" (English) is currently defined.
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>down</option>
+        </term>
+        <listitem>
+          <para>If this is defined, the server will not start when
+          invoked; instead, it will produce the given text as an
+          error message and then exit. This is useful during maintenance
+          work. </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>eligible</option>
+        </term>
+        <listitem>
+          <para>
+	  Users whose name matches this pattern get an account as soon as they apply.
+          All others have to have their application checked by the Editors.
+	  <emphasis>Not honoured in this version. Currently, all users are considered eligible.</emphasis>
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>edit-lock-timeout</option></term>
+        <listitem>
+          <para>The amount of time in seconds that an editor may hold an exclusive lock on a file.
+	  <emphasis>Not honoured in this version, since editor commands are not implemented.</emphasis>
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>groggs-motd-bug</option></term>
+        <listitem>
+          <para>GROGGS, the original RGTP server, has a bug which swaps the date stamp and sequence number
+          of its message of the day. Use 1 here to emulate this, or 0 to behave according to the protocol.
+	  <emphasis>Not honoured in this version, since this only affects setting the MOTD, which is an editor
+          command; editor commands are not implemented yet.</emphasis>
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>logging</option></term>
+        <listitem>
+          <para>Set to 1 to log RGTP activity, 0 not to. See also <option>log-dir</option>.
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>log-dir</option>
+        </term>
+        <listitem>
+          <para>Name of the directory which holds logs for each vault.
+          A log's name is constructed from the name of the vault plus ".log".</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>mail-from</option></term>
+        <listitem>
+          <para>When the server sends out email, this is what goes in the "From" field.
+          If you don't supply a value here, &dhpackage; will use "root@" plus the local hostname.
+           See also <option>newbie-email-body</option>.
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>max-item-size</option>
+        </term>
+        <listitem>
+          <para>Maximum size in bytes that an item can reach before it
+          is considered "full", and must be continued. Note that items whose size is less than this limit may
+          be extended beyond it in their last reply.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>newbie-privs</option></term>
+        <listitem>
+          <para>Privs to give to newly created users. This should almost always be 2, append access.
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>newbie-email-subject</option></term>
+        <listitem>
+          <para>Subject line for the email about new accounts. See also <option>newbie-email-body</option>.
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>newbie-email-body</option></term>
+        <listitem>
+          <para>Body of the email about new accounts. The string "[SECRET]" is replaced with the new
+           secret (this is case sensitive). See also <option>newbie-email-subject</option>,
+           <option>mail-from</option> and <option>smtp-server</option>.
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>not-down</option>
+        </term>
+        <listitem>
+          <para>Ignored. Useful for saving "down" entries (q.v.) until
+          necessary.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>smtp-server</option></term>
+        <listitem>
+          <para>Name of the SMTP server to use for sending out email. See also <option>newbie-email-body</option>.
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>tracebacks</option></term>
+        <listitem>
+          <para>If &dhpackage; crashes, it will do so gracefully, and represent the error as an RGTP message,
+          so that clients can display it to their users.
+          When trying to track down the problem, it's sometimes useful to see a stack trace. Set this to 1 to
+          have one added to fatal error messages; set it to 0 not to.
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>vault-dir</option>
+        </term>
+        <listitem>
+          <para>Name of the directory which holds vault subdirectories
+          (see "The Vault", below).</para>
+        </listitem>
+      </varlistentry>
+
+    </variablelist>
+
+    <para>In addition, a configuration file may define boilerplate
+    text to be produced by the server, in "[codes]" and "[lang"... sections.
+    This is not usually modified
+    by the administrator, and this manual page does not (yet) attempt
+    to cover it.</para>
+
+  </refsect1>
+
+  <refsect1>
+    <title>THE VAULT</title>
+
+    <para>Each invocation of spurge works within one particular directory,
+    called a vault. On installation, there is only one vault, called "default",
+    but you may create others. (Future versions of spurge will have the
+    capacity to do this automatically.)</para>
+
+    <para>Vaults usually live underneath the directory /usr/lib/spurge. The minimal
+    vault is simply an empty directory; it may also contain one or more of the following
+    files:</para>
+
+    <variablelist>
+
+      <varlistentry>
+        <term><option>A1240111</option>
+        </term>
+        <listitem>
+          <para>(and similar names.) Item text. The name is known as an "itemid"; it consists of
+          one letter indicating the year (A being 1986, R being 2002) and seven numbers.
+          (The year after Z year is A year again.)</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>config</option>
+        </term>
+        <listitem>
+          <para>Local configuration settings; see CONFIGURATION, above.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>editlog</option>
+        </term>
+        <listitem>
+          <para>The edit log. If this is missing, it is the same as if it were empty.
+	  <emphasis>(Not viewable in this version.)</emphasis>
+	  </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>index</option>
+        </term>
+        <listitem>
+          <para>The index. If this is missing, it is the same as if it were empty.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>motd</option>
+        </term>
+        <listitem>
+          <para>The message of the day.</para>
+        </listitem>
+      </varlistentry>
+
+    </variablelist>
+
+    <para>As a rule of thumb, files which are not items should not have names which are
+    eight characters long, even if those names are not valid itemids.</para>
+
+  </refsect1>
+
+  <refsect1>
+    <title>SEE ALSO</title>
+
+    <para>yarrow (8), wrengroggs (1); the "greed" entry in Info.</para>
+
+    <para>The RGTP protocol, available at
+    http://www.groggs.group.cam.ac.uk/groggs/protocol.txt</para>
+
+  </refsect1>
+  <refsect1>
+    <title>AUTHOR</title>
+
+    <para>This manual page was written by &dhusername; &dhemail;.
+      Permission is
+      granted to copy, distribute and/or modify this document under
+      the terms of the <acronym>GNU</acronym> Free Documentation
+      License, Version 1.1 or any later version published by the Free
+      Software Foundation; with no Invariant Sections, no Front-Cover
+      Texts and no Back-Cover Texts.</para>
+
+  </refsect1>
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:2
+sgml-indent-data:t
+sgml-parent-document:nil
+sgml-default-dtd-file:nil
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+-->
+
+

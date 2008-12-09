@@ -1,0 +1,282 @@
+#!/usr/bin/python -u
+
+dirs = {
+    'python' :'/usr/lib',
+    'log' :'/var/log/spurge',
+    'vault' :'/var/lib/spurge/default',
+    'config' :'/etc',
+    'man' :'/usr/share/man/man8',
+    'sbin' : '/usr/sbin/',
+    }
+
+install_as_user = 'daemon'
+
+################################################################
+
+import sys
+import os
+import os.path
+import shutil
+import py_compile
+import ConfigParser
+import socket
+
+################################################################
+
+def install():
+    # Jobs of the installer:
+    # Check manifest
+
+    if os.getenv('DESTDIR'):
+        print "Warning: DESTDIR is defined, so I'm adding it to the start"
+        print "of all paths!"
+        print
+        destdir = os.getenv('DESTDIR')
+        for path in dirs.keys():
+            dirs[path] = destdir + dirs[path]
+
+    sys.stdout.write('Checking manifest... ')
+    for filename in ['spurge.py',
+                     'sbin-spurge',
+                     'spurge.conf',
+                     'vault.conf',
+                     ]:
+        if not os.path.isfile(filename):
+            sys.stdout.write('failed.\n%s is missing and needed.\n' % (filename))
+            sys.exit()
+    sys.stdout.write('good.\n')
+
+    sys.stdout.write('Checking for user "%s"... ' % (install_as_user))
+    install_as_uid = -1
+    for line in open('/etc/passwd').xreadlines():
+        if line.startswith(install_as_user + ':'):
+            install_as_uid = int(line.split(':')[2])
+            break
+
+    if install_as_uid==-1:
+            sys.stdout.write('failed.\nYou have no user called %s on this system.\n' % (
+                install_as_user))
+            sys.exit()
+        
+    sys.stdout.write('uid %d; good.\n' % (install_as_uid))
+
+    # Copy main spurge file in. Byte-compile it.
+
+    # Right. All subdirectories of dirs['python'] with names
+    # beginning 'python' are targets for us.
+    # (What if there isn't one? Really, we should create it...
+    # but if Python's installed and there's no /usr/lib/python-foo,
+    # we have big trouble.)
+
+    for name in os.listdir(dirs['python']):
+        if name.startswith('python'):
+            name = os.path.join(dirs['python'], name, 'spurge.py')
+
+            sys.stdout.write('Copying %s... ' % (name))
+            shutil.copyfile('spurge.py', name)
+            sys.stdout.write('good.\n')
+    
+            sys.stdout.write('Compiling %s... ' % (name))
+            py_compile.compile(name)
+            sys.stdout.write('good.\n')
+    
+    # Create /usr/sbin/spurge stub
+
+    sys.stdout.write('Copying stub... ')
+    if not os.path.isdir(dirs['sbin']):
+        os.makedirs(dirs['sbin'], 0755)
+    sbin_spurge = os.path.join(dirs['sbin'], 'spurge')
+    shutil.copyfile('sbin-spurge', sbin_spurge)
+    os.chmod(sbin_spurge, 0555)
+    sys.stdout.write('good.\n')
+    
+    # Create vault directory
+
+    sys.stdout.write('Creating vault directory... ')
+    if not os.path.isdir(dirs['vault']):
+        os.makedirs(dirs['vault'], 0755)
+    os.chown(dirs['vault'], install_as_uid, os.getgid())
+    sys.stdout.write('good.\n')
+
+    # Copy example MOTD in
+
+    sys.stdout.write('Copying initial message of the day... ')
+    vault_motd = os.path.join(dirs['vault'], 'motd')
+    shutil.copyfile('example-motd', vault_motd)
+    os.chown(vault_motd, install_as_uid, os.getgid())
+    sys.stdout.write('good.\n')
+
+    # Create baby index
+
+    sys.stdout.write('Creating empty index... ')
+    vault_index = os.path.join(dirs['vault'], 'index')
+    open(vault_index, 'a')
+    os.chown(vault_index, install_as_uid, os.getgid())
+    sys.stdout.write('good.\n')
+
+    # Copy vault config in
+
+    sys.stdout.write('Copying vault config... ')
+    vault_config = os.path.join(dirs['vault'], 'config')
+    shutil.copyfile('vault.conf', vault_config)
+    sys.stdout.write('good.\n')
+
+    # Copy global config in
+
+    sys.stdout.write('Copying global config... ')
+    if not os.path.isdir(dirs['config']):
+        os.makedirs(dirs['config'], 0755)
+    etc_spurge_conf = os.path.join(dirs['config'], 'spurge.conf')
+    shutil.copyfile('spurge.conf', etc_spurge_conf)
+    sys.stdout.write('good.\n')
+
+    # Create log directory
+
+    sys.stdout.write('Creating log directory... ')
+    if not os.path.isdir(dirs['log']):
+        os.makedirs(dirs['log'], 0755)
+    os.chown(dirs['log'], install_as_uid, os.getgid())
+    sys.stdout.write('good.\n')
+
+    # add rgtp to /etc/services, if not already present
+
+    sys.stdout.write('Setting up service name... ')
+
+    def rgtp_service_is_known():
+        try:
+            port = socket.getservbyname('rgtp', 'tcp')
+
+            if port==1431:
+                # correct.
+                return 1
+            else:
+                # Erk, it's defined as something weird.
+                # Bail out.
+                sys.stdout.write('failed.\nrgtp is defined as %d on your system!\n' % (port))
+                sys.exit()
+        except socket.error:
+            # so the service isn't known
+            return 0
+
+    if rgtp_service_is_known():
+        sys.stdout.write('already set up; ')
+    else:
+        etc_services = open('/etc/services', 'a')
+        etc_services.write('rgtp\t1431/tcp\t# reverse gossip transfer protocol\n')
+        etc_services.write('rgtp\t1431/udp\n')
+        etc_services.close()
+
+        if not rgtp_service_is_known():
+            sys.stdout.write('failed.\nrgtp could not be created, for some reason.\n')
+            sys.exit()
+
+    sys.stdout.write('good.\n')
+
+    # install man pages
+
+    sys.stdout.write('Copying man page... ')
+    if not os.path.isdir(dirs['man']):
+        os.makedirs(dirs['man'], 0755)
+    shutil.copyfile('spurge.8',
+                    os.path.join(dirs['man'], 'spurge.8'))
+    sys.stdout.write('good.\n')
+
+    # add para to inetd.conf / xinetd.conf as appropriate
+
+    def contains_rgtp(filename):
+        for line in open(filename).xreadlines():
+            if line.find('rgtp')!=-1:
+                return 1
+        return 0
+
+    updated_inetds = 0
+
+    inetd_conf = os.path.join(dirs['config'], 'inetd.conf')
+    xinetd_conf = os.path.join(dirs['config'], 'xinetd.conf')
+
+    if os.path.isfile(inetd_conf):
+        updated_inetds = updated_inetds + 1
+        sys.stdout.write('Updating inetd.conf... ')
+
+        if contains_rgtp(inetd_conf):
+            sys.stdout.write('already done; ')
+        else:
+            target = open(inetd_conf, 'a')
+            target.write('rgtp\tstream\ttcp\tnowait\t%s.tty\t%s\n' % (
+                install_as_user,
+                sbin_spurge))
+            target.close()
+            
+            if os.system('killall -HUP inetd')!=0:
+                sys.stdout.write('(Couldn\'t restart inetd!)')
+
+        sys.stdout.write('good.\n')
+
+    if os.path.isfile(xinetd_conf):
+        updated_inetds = updated_inetds + 1
+        sys.stdout.write('Updating xinetd.conf... ')
+
+        if contains_rgtp(xinetd_conf):
+            sys.stdout.write('already done; ')
+        else:
+            target = open(xinetd_conf, 'a')
+            target.write("""
+
+service rgtp
+{
+	socket_type     = stream
+	protocol        = tcp
+	wait            = no
+	user            = %s
+	group           = tty
+	server          = %s
+	# bind          = 123.45.67.8
+        # -- if you want to run multiple servers on
+        # different IPs
+}
+""" % (install_as_user, sbin_spurge) )
+            target.close()
+
+            if os.system('killall -HUP xinetd')!=0:
+                sys.stdout.write('(Couldn\'t restart xinetd!)')
+            
+        sys.stdout.write('good.\n')
+
+    if updated_inetds==0:
+        print 'Warning: You don\'t appear to have inetd.conf OR xinetd.conf on your system,'
+        print 'so you\'ll have to set that part up yourself.'
+    
+
+def uninstall():
+    # Jobs of the uninstaller:
+    # 1. Remove spurge and yarrow directories
+    # 2. Remove /usr/sbin/spurge stub
+    # 3. remove inetd.conf / xinetd.conf paras
+    # 4. restart inetd / xinetd
+
+    print 'uninstall. um. yeah.'
+
+################################################################
+
+if os.name!='posix':
+    print
+    print 'Warning: You appear to be attempting to use this script'
+    print '  on a non-Unix box. Be aware that the assumptions made here'
+    print '  are unlikely to be true for you.'
+    print
+
+operation = ''
+if len(sys.argv)>=2:
+    operation = sys.argv[1].lower()
+
+if operation=='install':
+    install()
+elif operation=='uninstall':
+    uninstall()
+else:
+    print 'syntax: %s [install|uninstall]' % (sys.argv[0])
+    print
+    print 'There is currently no uninstall script...' 
+    print
+    print 'You might want to check the paths given at the start of'
+    print 'this file, to make sure they apply to your system.'
