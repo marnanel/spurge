@@ -34,6 +34,10 @@ def install():
         destdir = os.getenv('DESTDIR')
         for path in dirs.keys():
             dirs[path] = destdir + dirs[path]
+            try:
+              os.makedirs (dirs[path])
+            except:
+              pass
 
     sys.stdout.write('Checking manifest... ')
     for filename in ['spurge.py',
@@ -161,7 +165,7 @@ def install():
     if rgtp_service_is_known():
         sys.stdout.write('already set up; ')
     else:
-        etc_services = open('/etc/services', 'a')
+        etc_services = open(dirs['config']+'/services', 'a')
         etc_services.write('rgtp\t1431/tcp\t# reverse gossip transfer protocol\n')
         etc_services.write('rgtp\t1431/udp\n')
         etc_services.close()
