@@ -757,7 +757,7 @@ class connection:
 
 		while 1:
 			result = '%c%07d' % (
-				65+time.gmtime()[0]-1985,
+				65+(time.gmtime()[0]-1985)%26,
 				random.randrange(0,9000000))
 
 			if not os.path.isfile(self.filename(result)):
