@@ -40,7 +40,7 @@
 import sys
 import ConfigParser
 import os.path
-import md5
+import hashlib
 import binascii
 import re
 import socket
@@ -366,7 +366,7 @@ class connection:
 		while len(squished_userid)<16:
 			squished_userid += '\0'
 
-		fingerprint = md5.new()
+		fingerprint = hashlib.md5()
 		fingerprint.update(binascii.unhexlify(params[1]))
 		fingerprint.update(binascii.unhexlify(self.server_nonce))
 		fingerprint.update(squished_userid)
@@ -374,7 +374,7 @@ class connection:
 
 		if params[0].lower()==fingerprint.hexdigest():
 			# yay, they're who we think they are
-			response = md5.new()
+			response = hashlib.md5()
 			response.update(binascii.unhexlify(self.server_nonce))
 			response.update(binascii.unhexlify(params[1]))
 			response.update(squished_userid)
