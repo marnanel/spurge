@@ -1,3 +1,9 @@
+I'm in the middle of bringing spurge up to modern packaging standards.
+
+
+----
+
+
 SPURGE v0.5.0 - VERY BRIEF RELEASE NOTES
 
 This is a complete rewrite of spurge v0.30 in Python.
