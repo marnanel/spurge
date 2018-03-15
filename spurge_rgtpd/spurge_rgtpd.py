@@ -38,7 +38,7 @@
 ################################################################
 
 import sys
-import ConfigParser
+import configparser
 import os.path
 import hashlib
 import binascii
@@ -251,7 +251,7 @@ class connection:
                 if request_char in ('1', '2', '3'):
                     requested_access = int(request_char)
             username = params[0]
-            users = ConfigParser.ConfigParser()
+            users = configparser.ConfigParser()
             users.read(self.filename('users'))
             if not users.has_section(username):
                 self.boilerplate('unknown-user')
@@ -289,7 +289,7 @@ class connection:
             self.boilerplate('unearthly-email-address')
             return
 
-        users = ConfigParser.ConfigParser()
+        users = configparser.ConfigParser()
         users.read(self.filename('users'))
 
         if users.has_section(params):
@@ -857,7 +857,7 @@ def calling_host():
 
 def go():
 
-    config = ConfigParser.ConfigParser()
+    config = configparser.ConfigParser()
 
     try:
         vaultname = None
