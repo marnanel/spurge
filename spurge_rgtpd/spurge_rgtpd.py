@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 "Spurge RGTP server (simple python-based user-friendly reverse gossip engine)"
 
 #
@@ -855,7 +856,7 @@ def calling_host():
 
 ###############################################################
 
-def go():
+def main():
 
     config = configparser.ConfigParser()
 
@@ -929,3 +930,7 @@ def go():
                     trace += ' '+line.replace('\n','\r\n ')
 
                 sys.stdout.write(trace+'\r\n.\r\n')
+
+if __name__=='__main__':
+    main()
+
