@@ -2,8 +2,8 @@
 "Spurge RGTP server (simple python-based user-friendly reverse gossip engine)"
 
 #
-# Copyright (c) 2002 Thomas Thurman
-# thomas@thurman.org.uk
+# Copyright (c) 2002-2018 Marnanel Thurman
+# marnanel@thurman.org.uk
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
