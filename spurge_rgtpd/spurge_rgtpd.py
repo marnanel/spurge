@@ -49,7 +49,7 @@ import traceback
 import time
 import random
 import smtplib
-import getopt
+import argparse
 
 basic_config_filename = '/etc/spurge.conf'
 
@@ -861,57 +861,28 @@ def main():
     config = configparser.ConfigParser()
 
     try:
-        vaultname = None
         
-        config.read(basic_config_filename)
+        args_parser = argparse.ArgumentParser(
+                description='RGTP server')
+        args_parser.add_argument(
+                '--vault', metavar='DIR', type=str,
+                help='directory containing discussion items')
+        args_parser.add_argument(
+                '--no-logging', action='store_true',
+                help="don't keep logs")
+        args = args_parser.parse_args()
 
-        # Don't expect (most of) the switches to do anything yet.
-        options, arguments = getopt.getopt(sys.argv[1:], '',
-                           ['help',
-                            'vault=',
-                            'user=',
-                            'list',
-                            'create',
-                            'destroy',
-                            'set=',
-                            'no-logging',
-                            ])
+        if not args.vault:
+            args.vault = 'default'
 
-        if arguments!=[]:
-            raise "Useless extra stuff on command line " + str(arguments)
-
-        for option, value in options:
-            if option=='--help':
-                print('%s: no help yet. maybe next time.' % (sys.argv[0]))
-                sys.exit()
-            elif option=='--vault':
-                if value.find('.')!=-1 or value.find('/')!=-1:
-                    raise 'illegal characters in vault name'
-                vaultname = value
-            elif option=='--no-logging':
-                config.set('main', 'logging', '0')
-            else:
-                raise 'known but unhandled option: '+option
-
-        if not vaultname:
-            # before now, we might have needed to know when no vault
-            # had been specified. but by now, we really need a name,
-            # so pick the default
-            vaultname = 'default'
-
-        if not os.path.isdir(os.path.join(config.get('main', 'vault-dir'),
-                          vaultname)):
-            
-            # You have to have the directory; even thouhg it doesn't have
-            # have anything in it, it must _exist_.
-            
-            raise 'vault "%s" does not exist' % (vaultname)
+        if not os.path.isdir(args.vault):
+            raise ValueError('vault "%s" does not exist' % (args.vault,))
 
         config.read(os.path.join(config.get('main', 'vault-dir'),
                      vaultname,
                      'config'))
         
-        connection(config, vaultname).discuss()
+        connection(config, args.vault).discuss()
 
     except:
         problem = sys.exc_info()
