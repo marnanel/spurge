@@ -252,7 +252,7 @@ class connection:
                     requested_access = int(request_char)
             username = params[0]
             users = configparser.ConfigParser()
-            users.read(self.filename('users'))
+            users.read(self.filename('users.conf'))
             if not users.has_section(username):
                 self.boilerplate('unknown-user')
                 self.exit_program()
@@ -390,16 +390,16 @@ class connection:
             self.boilerplate('auth-failed')
             self.exit_program()
 
-        def handle_alvl(self, params):
-                "1:request different privs"
-                self.not_implemented()
+    def handle_alvl(self, params):
+        "1:request different privs"
+        self.not_implemented()
 
-        def handle_motd(self, params):
-                "0:request the message of the day"
+    def handle_motd(self, params):
+        "0:request the message of the day"
         self.dump_file('motd')
 
-        def handle_indx(self, params):
-                "1:request a list of all available items"
+    def handle_indx(self, params):
+        "1:request a list of all available items"
 
         class IndexFilter:
             def __init__(self, left_margin, value):
@@ -423,8 +423,8 @@ class connection:
                 
         self.dump_file('index', filter, 1)
 
-        def handle_item(self, params):
-                "1:request one particular item"
+    def handle_item(self, params):
+        "1:request one particular item"
         params = params.upper()
         if self.itemid_regexp.match(params):
             # OK, so it looks like an itemid...
@@ -432,8 +432,8 @@ class connection:
         else:
             self.boilerplate('unearthly-itemid')
 
-        def handle_stat(self, params):
-                "1:request the status of an item"
+    def handle_stat(self, params):
+        "1:request the status of an item"
         params = params.upper()
         if self.itemid_regexp.match(params):
             filename = self.filename(params)
@@ -444,8 +444,8 @@ class connection:
         else:
             self.boilerplate('unearthly-itemid')
 
-        def handle_data(self, params):
-                "0:provide your name and some data, for a future command"
+    def handle_data(self, params):
+        "0:provide your name and some data, for a future command"
 
         self.boilerplate('data-please')
         sys.stdout.flush()
@@ -460,8 +460,8 @@ class connection:
             
         self.boilerplate('data-thank-you')
 
-        def handle_newi(self, params):
-                "2d:create a new item"
+    def handle_newi(self, params):
+        "2d:create a new item"
 
         sequence = self.new_sequence()
         itemid = self.new_itemid()
@@ -496,8 +496,8 @@ class connection:
         self.output(220, '%08x  %s' % (sequence,
                            'OK, posted'))
 
-        def handle_repl(self, params):
-                "2d:reply to an item"
+    def handle_repl(self, params):
+        "2d:reply to an item"
         itemid = params.upper()
         sequence = self.new_sequence()
         filename = self.filename(itemid)
@@ -537,8 +537,8 @@ class connection:
             self.continuing = None
             self.output(220, '%08x  OK, posted' % (sequence))
 
-        def handle_cont(self, params):
-                "2d:continue a full item"
+    def handle_cont(self, params):
+        "2d:continue a full item"
         # This is pretty similar to newi; refactor.
         # (is it still? FIXME)
 
@@ -604,44 +604,44 @@ class connection:
         self.data = None
         self.continuing = None
 
-        def handle_edlk(self, params):
-                "3:get a lock before editing"
-                self.not_implemented()
+    def handle_edlk(self, params):
+        "3:get a lock before editing"
+        self.not_implemented()
 
-        def handle_edul(self, params):
-                "3e:relinquish the edit lock"
-                self.not_implemented()
+    def handle_edul(self, params):
+        "3e:relinquish the edit lock"
+        self.not_implemented()
 
-        def handle_edit(self, params):
-                "3e:begin editing an item"
-                self.not_implemented()
+    def handle_edit(self, params):
+        "3e:begin editing an item"
+        self.not_implemented()
 
-        def handle_edix(self, params):
-                "3e:begin editing the index"
-                self.not_implemented()
+    def handle_edix(self, params):
+        "3e:begin editing the index"
+        self.not_implemented()
 
-        def handle_edcf(self, params):
-                "3e:confirm (finish) an edit"
-                self.not_implemented()
+    def handle_edcf(self, params):
+        "3e:confirm (finish) an edit"
+        self.not_implemented()
 
-        def handle_edab(self, params):
-                "3e:abort an edit"
-                self.not_implemented()
+    def handle_edab(self, params):
+        "3e:abort an edit"
+        self.not_implemented()
 
-        def handle_mots(self, params):
-                "3d:set the message of the day"
-                self.not_implemented()
+    def handle_mots(self, params):
+        "3d:set the message of the day"
+        self.not_implemented()
 
-        def handle_elog(self, params):
-                "1:list all administrative edits"
-                self.not_implemented()
+    def handle_elog(self, params):
+        "1:list all administrative edits"
+        self.not_implemented()
 
-        def handle_diff(self, params):
-                "3x:?"
-                self.not_implemented()
+    def handle_diff(self, params):
+        "3x:?"
+        self.not_implemented()
 
-        def handle_quit(self, params=None):
-                "0:log out"
+    def handle_quit(self, params=None):
+        "0:log out"
         self.boilerplate('goodbye')
         self.exit_program()
 
@@ -650,8 +650,8 @@ class connection:
         self.flush_log()
         sys.exit()
 
-        def handle_regu(self, params):
-                "0:get yourself a new account"
+    def handle_regu(self, params):
+        "0:get yourself a new account"
         if self.user:
             self.boilerplate('unexpected-regu')
         elif self.creating_account:
@@ -665,46 +665,46 @@ class connection:
 
             self.creating_account = 1
 
-        def handle_udbm(self, params):
-            "3:database maintenance"
-            self.not_implemented()
+    def handle_udbm(self, params):
+        "3:database maintenance"
+        self.not_implemented()
 
-        def handle_noop(self, params):
-            "0:does nothing"
-            self.boilerplate('noop')
+    def handle_noop(self, params):
+        "0:does nothing"
+        self.boilerplate('noop')
 
-        def handle_xyzz(self, params):
-            "0x:magic word"
-            self.boilerplate('xyzzy')
+    def handle_xyzz(self, params):
+        "0x:magic word"
+        self.boilerplate('xyzzy')
 
-        def handle_help(self, params):
-            "0:list all the commands"
+    def handle_help(self, params):
+        "0:list all the commands"
 
-            self.boilerplate('help-spiel-begin')
-            methods = self.__class__.__dict__.keys()
-            methods.sort()
-            for method in methods:
-                if method.startswith('handle_'):
-                    docstring = self.__class__.__dict__[method].__doc__
+        self.boilerplate('help-spiel-begin')
+        methods = self.__class__.__dict__.keys()
+        methods.sort()
+        for method in methods:
+            if method.startswith('handle_'):
+                docstring = self.__class__.__dict__[method].__doc__
 
-                    if int(docstring[0]) > self.access_level:
-                        continue
-                
-                    colon = docstring.index(':')
-                    flags = docstring[1:colon]
+                if int(docstring[0]) > self.access_level:
+                    continue
 
-                    if 'x' in flags:
-                        continue
-                    if 'd' in flags:
-                        docstring += ' (needs some DATA)'
-                    if 'e' in flags:
-                        docstring += ' (needs the edit lock)'
-                
-                    self.output_line('%s - %s' % (
-                        method[7:].upper(),
-                        docstring[colon+1:]))
+                colon = docstring.index(':')
+                flags = docstring[1:colon]
 
-            self.end_output()
+                if 'x' in flags:
+                    continue
+                if 'd' in flags:
+                    docstring += ' (needs some DATA)'
+                if 'e' in flags:
+                    docstring += ' (needs the edit lock)'
+
+                self.output_line('%s - %s' % (
+                    method[7:].upper(),
+                    docstring[colon+1:]))
+
+        self.end_output()
 
     def not_implemented(self):
         self.boilerplate('not-implemented')
