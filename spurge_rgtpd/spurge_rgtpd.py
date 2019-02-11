@@ -127,8 +127,7 @@ class connection:
         self.language = self.conf('default-language')
         self.access_level = self.confbool('allow-anonymous')
         self.potential_access_level = self.access_level
-        self.directory = os.path.join(self.conf('vault-dir'),
-                          vaultname)
+        self.directory = vaultname
 
         if self.confbool('logging'):
             self.logfile = open(os.path.join(self.conf('log-dir'),
@@ -878,9 +877,8 @@ def main():
         if not os.path.isdir(args.vault):
             raise ValueError('vault "%s" does not exist' % (args.vault,))
 
-        config.read(os.path.join(config.get('main', 'vault-dir'),
-                     vaultname,
-                     'config'))
+        config.read(os.path.join(args.vault,
+                     'vault.conf'))
         
         connection(config, args.vault).discuss()
 
