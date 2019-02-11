@@ -70,9 +70,10 @@ class blob:
         self.name = name
 
     def spew_into(self, target, filter=None):
-        for line in open(self.name).xreadlines():
-            if not filter or filter(line):
-                target.output_line(line[:-1])
+        with open(self.name, 'r') as f:
+            for line in f:
+                if not filter or filter(line):
+                    target.output_line(line[:-1])
 
 ################################################################
 
