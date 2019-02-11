@@ -682,8 +682,7 @@ class connection:
 
         self.boilerplate('help-spiel-begin')
         methods = self.__class__.__dict__.keys()
-        methods.sort()
-        for method in methods:
+        for method in sorted(methods):
             if method.startswith('handle_'):
                 docstring = self.__class__.__dict__[method].__doc__
 
