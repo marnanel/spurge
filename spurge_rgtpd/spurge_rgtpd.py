@@ -189,7 +189,7 @@ class connection:
                 
             command = 'handle_'+command[0].lower()[:4]
             methods = self.__class__.__dict__
-            if methods.has_key(command):
+            if command in methods:
                 flags = methods[command].__doc__
                 flags = flags[:flags.index(':')]
 
